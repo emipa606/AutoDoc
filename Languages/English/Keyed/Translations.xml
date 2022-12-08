@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+  <AuDo_CurrentBill>Current Bill: {0}</AuDo_CurrentBill>
+  <AuDo_TimeLeft>Time Left: {0}</AuDo_TimeLeft>
+  <AuDo_Requires>Requires: </AuDo_Requires>
+  <AuDo_NoTask>No Task</AuDo_NoTask>
+  <AuDo_Done>Done</AuDo_Done>
+  <AuDo_Enter>Enter Auto Doc</AuDo_Enter>
+  <AuDo_Exit>Exit Auto Doc</AuDo_Exit>
+  <AuDo_ExitTT>Ejects the pawn inside.</AuDo_ExitTT>
+  <AuDo_Busy>Busy</AuDo_Busy>
+  <AuDo_Empty>Empty</AuDo_Empty>
+</LanguageData>
