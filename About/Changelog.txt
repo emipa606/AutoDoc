@@ -1,5 +1,8 @@
 # Changelog for AutoDoc
 
+1.4.1 - Should now correctly spawn parts and organs
+
+
 1.4.0 - First publish.
 Used DeepL to update translations for ChineseSimplified, French, German, Russian
 

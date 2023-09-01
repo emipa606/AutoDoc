@@ -37,3 +37,4 @@ I'm currently busy so I won't be able to update it for now.
 -  If you have the solution for a problem, please post it to the GitHub repository.
 
 
+https://steamcommunity.com/sharedfiles/filedetails/changelog/2899262327]Last updated 2023-09-01

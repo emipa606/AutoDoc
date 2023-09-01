@@ -50,31 +50,51 @@ internal class CompAutoDoc : ThingComp
 
         if (surgeryBill != null)
         {
-            foreach (var item3 in ingredients)
+            if (surgeryBill.recipe.Worker is Recipe_RemoveBodyPart ||
+                surgeryBill.recipe.Worker.GetType().IsSubclassOf(typeof(Recipe_RemoveBodyPart)))
             {
-                try
+                var recipeWorker = (Recipe_RemoveBodyPart)surgeryBill.recipe.Worker;
+                var medicalBill = (Bill_Medical)surgeryBill;
+                if (recipeWorker.SpawnPartsWhenRemoved)
                 {
-                    surgeryBill.Notify_IterationCompleted(null, null);
-                }
-                catch
-                {
-                    // ignored
-                }
-
-                if (item3 == null || item3.Destroyed)
-                {
-                    continue;
-                }
-
-                if (item3.stackCount > 1)
-                {
-                    item3.stackCount--;
-                }
-                else
-                {
-                    item3.Destroy();
+                    MedicalRecipesUtility.SpawnNaturalPartIfClean(PawnContained, medicalBill.Part,
+                        MaterialSearch.RandomCell, parent.Map);
+                    MedicalRecipesUtility.SpawnThingsFromHediffs(PawnContained, medicalBill.Part,
+                        MaterialSearch.RandomCell, parent.Map);
                 }
             }
+
+            if (ingredients != null && ingredients.Any())
+            {
+                // ReSharper disable once ForCanBeConvertedToForeach
+                for (var index = 0; index < ingredients.Count; index++)
+                {
+                    var item3 = ingredients[index];
+                    try
+                    {
+                        surgeryBill.Notify_IterationCompleted(null, null);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    if (item3 == null || item3.Destroyed)
+                    {
+                        continue;
+                    }
+
+                    if (item3.stackCount > 1)
+                    {
+                        item3.stackCount--;
+                    }
+                    else
+                    {
+                        item3.Destroy();
+                    }
+                }
+            }
+
 
             AutoDoc.SetSurgeryInProgress(false);
             timer = -1f;
@@ -155,6 +175,7 @@ internal class CompAutoDoc : ThingComp
             ingredients = ingredientList;
             timer = surgeryBill.recipe.workAmount;
             AutoDoc.SetSurgeryInProgress(true);
+            break;
         }
     }
 
