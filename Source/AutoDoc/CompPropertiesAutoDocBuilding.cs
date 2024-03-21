@@ -2,6 +2,4 @@ using Verse;
 
 namespace AutoDoc;
 
-internal class CompPropertiesAutoDocBuilding : CompProperties
-{
-}
+internal class CompPropertiesAutoDocBuilding : CompProperties;

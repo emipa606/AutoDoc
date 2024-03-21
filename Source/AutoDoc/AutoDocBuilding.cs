@@ -58,6 +58,8 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
                 myPawn, (LocalTargetInfo)this);
         }
 
+        yield break;
+
         void MakeJob()
         {
             var job = JobMaker.MakeJob(jobDef, this);
@@ -82,7 +84,7 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
             defaultLabel = "AuDo_Exit".Translate(),
             action = EjectContents,
             defaultDesc = "AuDo_ExitTT".Translate(),
-            disabled = false,
+            Disabled = false,
             icon = ContentFinder<Texture2D>.Get("Icons/ExitAutoDoc")
         };
         if (SurgeryInProgress)

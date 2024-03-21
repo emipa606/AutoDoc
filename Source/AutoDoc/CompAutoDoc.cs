@@ -53,9 +53,8 @@ internal class CompAutoDoc : ThingComp
             if (surgeryBill.recipe.Worker is Recipe_RemoveBodyPart ||
                 surgeryBill.recipe.Worker.GetType().IsSubclassOf(typeof(Recipe_RemoveBodyPart)))
             {
-                var recipeWorker = (Recipe_RemoveBodyPart)surgeryBill.recipe.Worker;
                 var medicalBill = (Bill_Medical)surgeryBill;
-                if (recipeWorker.SpawnPartsWhenRemoved)
+                if (medicalBill.Part.def.spawnThingOnRemoved != null)
                 {
                     MedicalRecipesUtility.SpawnNaturalPartIfClean(PawnContained, medicalBill.Part,
                         MaterialSearch.RandomCell, parent.Map);
@@ -226,10 +225,10 @@ internal class CompAutoDoc : ThingComp
     {
         return parent.Rotation.ToString() switch
         {
-            "0" => new[] { 3, 4, 0, 1 },
-            "1" => new[] { 4, 3, 1, 0 },
-            "2" => new[] { 3, 4, 0, 0 },
-            _ => new[] { 4, 3, 0, 0 }
+            "0" => [3, 4, 0, 1],
+            "1" => [4, 3, 1, 0],
+            "2" => [3, 4, 0, 0],
+            _ => [4, 3, 0, 0]
         };
     }
 
