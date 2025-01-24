@@ -2,7 +2,7 @@
 <ModSyncNinjaData>
   <ID>a293e798-ab49-47bb-acfc-6ad8fdb560f5</ID>
   <ModName>Auto Doc (Continued)</ModName>
-  <Version>1.5.0</Version>
+  <Version>1.5.1</Version>
   <SaveBreaking>False</SaveBreaking>
   <Host name="Github">
     <Owner>emipa606</Owner>
@@ -12,3 +12,4 @@
     <Branch>master</Branch>
   </Host>
 </ModSyncNinjaData>
+
