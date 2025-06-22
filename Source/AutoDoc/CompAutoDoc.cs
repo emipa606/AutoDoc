@@ -8,9 +8,9 @@ namespace AutoDoc;
 internal class CompAutoDoc : ThingComp
 {
     private List<Thing> ingredients;
-    private CellRect MaterialSearch;
+    private CellRect materialSearch;
 
-    public Bill surgeryBill;
+    private Bill surgeryBill;
 
     private float timer = -1f;
 
@@ -18,7 +18,7 @@ internal class CompAutoDoc : ThingComp
 
     private AutoDocBuilding AutoDoc => parent as AutoDocBuilding;
 
-    public Pawn PawnContained => AutoDoc.PawnContained;
+    private Pawn PawnContained => AutoDoc.PawnContained;
 
     private Map ParentMap { get; set; }
 
@@ -26,7 +26,7 @@ internal class CompAutoDoc : ThingComp
     {
         base.PostSpawnSetup(respawningAfterLoad);
         ParentMap = parent.Map;
-        DrawRect();
+        drawRect();
     }
 
     public override void CompTick()
@@ -39,7 +39,7 @@ internal class CompAutoDoc : ThingComp
 
         if (PawnContained.health.HasHediffsNeedingTend())
         {
-            TendHediffs();
+            tendHediffs();
         }
 
         if (timer > 0f)
@@ -57,9 +57,9 @@ internal class CompAutoDoc : ThingComp
                 if (medicalBill.Part.def.spawnThingOnRemoved != null)
                 {
                     MedicalRecipesUtility.SpawnNaturalPartIfClean(PawnContained, medicalBill.Part,
-                        MaterialSearch.RandomCell, parent.Map);
+                        materialSearch.RandomCell, parent.Map);
                     MedicalRecipesUtility.SpawnThingsFromHediffs(PawnContained, medicalBill.Part,
-                        MaterialSearch.RandomCell, parent.Map);
+                        materialSearch.RandomCell, parent.Map);
                 }
             }
 
@@ -103,11 +103,11 @@ internal class CompAutoDoc : ThingComp
 
         if (PawnContained.health.surgeryBills.Bills.Count > 0)
         {
-            DoSurgery();
+            doSurgery();
         }
     }
 
-    private void TendHediffs()
+    private void tendHediffs()
     {
         var hediffs = PawnContained.health.hediffSet.hediffs;
         // ReSharper disable once ForCanBeConvertedToForeach
@@ -123,13 +123,13 @@ internal class CompAutoDoc : ThingComp
         }
     }
 
-    private void DoSurgery()
+    private void doSurgery()
     {
         var bills = PawnContained.health.surgeryBills.Bills;
         foreach (var bill in bills)
         {
             surgeryBill = bill;
-            var list = CheckMat();
+            var list = checkMat();
             if (list == null)
             {
                 continue;
@@ -178,20 +178,20 @@ internal class CompAutoDoc : ThingComp
         }
     }
 
-    private void DrawRect()
+    private void drawRect()
     {
         var position = parent.Position;
-        var array = DeterDimensions();
+        var array = deterDimensions();
         position.x += array[2];
         position.z += array[3];
-        MaterialSearch = CellRect.CenteredOn(position, array[0], array[1]);
-        MaterialSearch.DebugDraw();
+        materialSearch = CellRect.CenteredOn(position, array[0], array[1]);
+        materialSearch.DebugDraw();
     }
 
-    private List<Thing> CheckMat()
+    private List<Thing> checkMat()
     {
         var list = new List<Thing>();
-        foreach (var item in MaterialSearch)
+        foreach (var item in materialSearch)
         {
             if (item.GetFirstItem(ParentMap) != null)
             {
@@ -221,7 +221,7 @@ internal class CompAutoDoc : ThingComp
         return stringBuilder.ToString();
     }
 
-    private int[] DeterDimensions()
+    private int[] deterDimensions()
     {
         return parent.Rotation.ToString() switch
         {

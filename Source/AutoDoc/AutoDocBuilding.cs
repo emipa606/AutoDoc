@@ -11,7 +11,7 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
 {
     public const int tickRate = 60;
 
-    public CompAutoDoc autoDoc;
+    private CompAutoDoc autoDoc;
 
     private CompBreakdownable breakdownable;
     private CompPowerTrader powerComp;
@@ -30,7 +30,7 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
         }
     }
 
-    public bool SurgeryInProgress { get; set; }
+    private bool SurgeryInProgress { get; set; }
 
     public Pawn PawnContained => innerContainer.FirstOrDefault() as Pawn;
 
@@ -54,13 +54,13 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
         {
             jobDef = JobDefOf.EnterCryptosleepCasket;
             yield return FloatMenuUtility.DecoratePrioritizedTask(
-                new FloatMenuOption("AuDo_Enter".Translate(), MakeJob),
+                new FloatMenuOption("AuDo_Enter".Translate(), makeJob),
                 myPawn, (LocalTargetInfo)this);
         }
 
         yield break;
 
-        void MakeJob()
+        void makeJob()
         {
             var job = JobMaker.MakeJob(jobDef, this);
             myPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
@@ -74,12 +74,12 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
             yield return gizmo;
         }
 
-        yield return ExitAutoDoc();
+        yield return exitAutoDoc();
     }
 
-    private Gizmo ExitAutoDoc()
+    private Gizmo exitAutoDoc()
     {
-        var command_Action = new Command_Action
+        var commandAction = new Command_Action
         {
             defaultLabel = "AuDo_Exit".Translate(),
             action = EjectContents,
@@ -89,14 +89,14 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
         };
         if (SurgeryInProgress)
         {
-            command_Action.Disable("AuDo_Busy".Translate());
+            commandAction.Disable("AuDo_Busy".Translate());
         }
         else if (PawnContained == null)
         {
-            command_Action.Disable("AuDo_Empty".Translate());
+            commandAction.Disable("AuDo_Empty".Translate());
         }
 
-        return command_Action;
+        return commandAction;
     }
 
     public void SetSurgeryInProgress(bool setting)

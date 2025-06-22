@@ -9,6 +9,7 @@
     <li>1.3</li>
     <li>1.4</li>
     <li>1.5</li>
+    <li>1.6</li>
   </supportedVersions>
   <modDependencies />
   <loadAfter />
@@ -57,5 +58,5 @@ I'm currently busy so I won't be able to update it for now.
 [/list] 
 
 [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/2899262327][img]https://img.shields.io/github/v/release/emipa606/AutoDoc?label=latest%20version&amp;style=plastic&amp;color=9f1111&amp;labelColor=black[/img][/url] | tags:  solo play</description>
-  <modVersion IgnoreIfNoMatchingField="True">1.5.1</modVersion>
+  <modVersion IgnoreIfNoMatchingField="True">1.6.0</modVersion>
 </ModMetaData>
