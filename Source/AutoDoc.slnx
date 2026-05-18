@@ -3,4 +3,19 @@
     <BuildType Name="Release" />
   </Configurations>
   <Project Path="AutoDoc/AutoDoc.csproj" />
+  <Folder Name="/.github/">
+    <File Path="../.github/copilot-instructions.md" />
+  </Folder>
+  <Folder Name="/XML/Languages/English/Keyed/">
+    <File Path="../Languages/English/Keyed/Translations.xml" />
+  </Folder>
+  <Folder Name="/XML/Defs/ThingDef_Building/">
+    <File Path="../Defs/ThingDef_Building/Auto_Doc.xml" />
+  </Folder>
+  <Folder Name="/XML/Defs/ResearchProjectDefs/">
+    <File Path="../Defs/ResearchProjectDefs/ResearchProjects.xml" />
+  </Folder>
+  <Folder Name="/XML/About/">
+    <File Path="../About/about.xml" />
+  </Folder>
 </Solution>
