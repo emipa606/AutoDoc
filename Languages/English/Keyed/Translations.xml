@@ -7,7 +7,7 @@
   <AuDo_Done>Done</AuDo_Done>
   <AuDo_Enter>Enter Auto Doc</AuDo_Enter>
   <AuDo_Exit>Exit Auto Doc</AuDo_Exit>
-  <AuDo_ExitTT>Ejects the pawn inside.</AuDo_ExitTT>
+  <AuDo_ExitTT>Ejects the pawn inside. Select Auto Doc to see the item range.</AuDo_ExitTT>
   <AuDo_Busy>Busy</AuDo_Busy>
   <AuDo_Empty>Empty</AuDo_Empty>
 </LanguageData>

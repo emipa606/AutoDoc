@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using RimWorld;
 using Verse;
@@ -10,7 +12,7 @@ internal class CompAutoDoc : ThingComp
     private List<Thing> ingredients;
     private CellRect materialSearch;
 
-    private Bill surgeryBill;
+    private Bill_Medical surgeryBill;
 
     private float timer = -1f;
 
@@ -50,51 +52,7 @@ internal class CompAutoDoc : ThingComp
 
         if (surgeryBill != null)
         {
-            if (surgeryBill.recipe.Worker is Recipe_RemoveBodyPart ||
-                surgeryBill.recipe.Worker.GetType().IsSubclassOf(typeof(Recipe_RemoveBodyPart)))
-            {
-                var medicalBill = (Bill_Medical)surgeryBill;
-                if (medicalBill.Part.def.spawnThingOnRemoved != null)
-                {
-                    MedicalRecipesUtility.SpawnNaturalPartIfClean(PawnContained, medicalBill.Part,
-                        materialSearch.RandomCell, parent.Map);
-                    MedicalRecipesUtility.SpawnThingsFromHediffs(PawnContained, medicalBill.Part,
-                        materialSearch.RandomCell, parent.Map);
-                }
-            }
-
-            if (ingredients != null && ingredients.Any())
-            {
-                try
-                {
-                    surgeryBill.Notify_IterationCompleted(PawnContained, ingredients);
-                }
-                catch
-                {
-                    // ignored
-                }
-
-                // ReSharper disable once ForCanBeConvertedToForeach
-                for (var index = 0; index < ingredients.Count; index++)
-                {
-                    var item3 = ingredients[index];
-                    if (item3 == null || item3.Destroyed)
-                    {
-                        continue;
-                    }
-
-                    if (item3.stackCount > 1)
-                    {
-                        item3.stackCount--;
-                    }
-                    else
-                    {
-                        item3.Destroy();
-                    }
-                }
-            }
-
-
+            completeSurgery();
             AutoDoc.SetSurgeryInProgress(false);
             timer = -1f;
             surgeryBill = null;
@@ -128,53 +86,205 @@ internal class CompAutoDoc : ThingComp
         var bills = PawnContained.health.surgeryBills.Bills;
         foreach (var bill in bills)
         {
-            surgeryBill = bill;
-            var list = checkMat();
-            if (list == null)
+            if (bill is not Bill_Medical medicalBill)
             {
                 continue;
             }
 
-            var ingredientList = new List<Thing>();
-
-            foreach (var thing in list)
-            {
-                if (!surgeryBill.recipe.IsIngredient(thing.def))
-                {
-                    continue;
-                }
-
-                var fixedIngredientCount =
-                    surgeryBill.recipe.ingredients.FirstOrDefault(count =>
-                        count.IsFixedIngredient && count.FixedIngredient == thing.def);
-
-                if (fixedIngredientCount != null)
-                {
-                    ingredientList.Add(thing);
-                    continue;
-                }
-
-                var ingredientsCount =
-                    surgeryBill.recipe.ingredients.FirstOrDefault(count =>
-                        !count.IsFixedIngredient && count.filter.Allows(thing));
-
-                if (ingredientsCount != null &&
-                    ingredientsCount.CountRequiredOfFor(thing.def, surgeryBill.recipe, surgeryBill) >
-                    ingredientList.Count(currentThing => currentThing.def == thing.def))
-                {
-                    ingredientList.Add(thing);
-                }
-            }
-
-            if (ingredientList.Count < surgeryBill.recipe.ingredients.Count)
+            var availableIngredients = checkMat();
+            if (availableIngredients == null)
             {
                 continue;
             }
 
+            if (!tryBuildIngredientList(medicalBill, availableIngredients, out var ingredientList))
+            {
+                continue;
+            }
+
+            surgeryBill = medicalBill;
             ingredients = ingredientList;
             timer = surgeryBill.recipe.workAmount;
             AutoDoc.SetSurgeryInProgress(true);
             break;
+        }
+    }
+
+    private void completeSurgery()
+    {
+        if (surgeryBill == null || PawnContained == null)
+        {
+            return;
+        }
+
+        try
+        {
+            surgeryBill.iterationCompleted = true;
+            if (isRemoveBodyPartRecipe(surgeryBill))
+            {
+                spawnRemovedBodyParts();
+                surgeryBill.recipe.Worker.ApplyOnPawn(PawnContained, surgeryBill.Part, null, ingredients, surgeryBill);
+            }
+            else
+            {
+                surgeryBill.recipe.Worker.ApplyOnPawn(PawnContained, surgeryBill.Part, PawnContained, ingredients,
+                    surgeryBill);
+            }
+
+            consumeIngredients();
+            if (PawnContained.RaceProps.IsFlesh)
+            {
+                PawnContained.records.Increment(RecordDefOf.OperationsReceived);
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+
+        if (!surgeryBill.DeletedOrDereferenced && surgeryBill.billStack != null)
+        {
+            surgeryBill.billStack.Delete(surgeryBill);
+        }
+    }
+
+    private bool isRemoveBodyPartRecipe(Bill_Medical bill)
+    {
+        return bill.recipe.Worker is Recipe_RemoveBodyPart ||
+               bill.recipe.Worker.GetType().IsSubclassOf(typeof(Recipe_RemoveBodyPart));
+    }
+
+    private void spawnRemovedBodyParts()
+    {
+        if (surgeryBill?.Part == null || ParentMap == null)
+        {
+            return;
+        }
+
+        var spawnCell = materialSearch.RandomCell;
+        if (surgeryBill.Part.def.spawnThingOnRemoved != null)
+        {
+            MedicalRecipesUtility.SpawnNaturalPartIfClean(PawnContained, surgeryBill.Part, spawnCell, ParentMap);
+        }
+
+        MedicalRecipesUtility.SpawnThingsFromHediffs(PawnContained, surgeryBill.Part, spawnCell, ParentMap);
+    }
+
+    private bool tryBuildIngredientList(Bill_Medical bill, List<Thing> availableThings, out List<Thing> ingredientList)
+    {
+        ingredientList = new List<Thing>();
+        var availableCountByThing = new Dictionary<Thing, int>();
+        foreach (var availableThing in availableThings)
+        {
+            if (availableThing == null || availableThing.Destroyed)
+            {
+                continue;
+            }
+
+            availableCountByThing[availableThing] = availableThing.stackCount;
+        }
+
+        if (!bill.uniqueRequiredIngredients.NullOrEmpty())
+        {
+            foreach (var uniqueIngredient in bill.uniqueRequiredIngredients)
+            {
+                if (uniqueIngredient == null || uniqueIngredient.Destroyed ||
+                    !availableCountByThing.TryGetValue(uniqueIngredient, out var count) || count < 1)
+                {
+                    ingredientList = null;
+                    return false;
+                }
+
+                ingredientList.Add(uniqueIngredient);
+                availableCountByThing[uniqueIngredient] = count - 1;
+            }
+        }
+
+        foreach (var ingredientCount in bill.recipe.ingredients)
+        {
+            var requiredAmount = bill.recipe.Worker.GetIngredientCount(ingredientCount, bill);
+            if (requiredAmount <= 0f)
+            {
+                continue;
+            }
+
+            var matchingThings = availableCountByThing.Keys
+                .Where(thing => availableCountByThing[thing] > 0 && ingredientCount.filter.Allows(thing))
+                .OrderByDescending(thing => bill.recipe.IngredientValueGetter.ValuePerUnitOf(thing.def))
+                .ToList();
+
+            foreach (var thing in matchingThings)
+            {
+                var availableUnits = availableCountByThing[thing];
+                if (availableUnits <= 0)
+                {
+                    continue;
+                }
+
+                var valuePerUnit = bill.recipe.IngredientValueGetter.ValuePerUnitOf(thing.def);
+                if (valuePerUnit <= 0f)
+                {
+                    continue;
+                }
+
+                var neededUnits = Math.Max(1, (int)Math.Ceiling(requiredAmount / valuePerUnit));
+                var takeUnits = Math.Min(availableUnits, neededUnits);
+                for (var i = 0; i < takeUnits; i++)
+                {
+                    ingredientList.Add(thing);
+                }
+
+                availableCountByThing[thing] = availableUnits - takeUnits;
+                requiredAmount -= takeUnits * valuePerUnit;
+                if (requiredAmount <= 0.001f)
+                {
+                    break;
+                }
+            }
+
+            if (!(requiredAmount > 0.001f))
+            {
+                continue;
+            }
+
+            ingredientList = null;
+            return false;
+        }
+
+        return true;
+    }
+
+    private void consumeIngredients()
+    {
+        if (ingredients == null || surgeryBill == null)
+        {
+            return;
+        }
+
+        var groupedIngredients = ingredients
+            .Where(thing => thing != null && !thing.Destroyed)
+            .GroupBy(thing => thing);
+
+        foreach (var ingredientGroup in groupedIngredients)
+        {
+            var sourceThing = ingredientGroup.Key;
+            var consumeCount = Math.Min(sourceThing.stackCount, ingredientGroup.Count());
+            if (consumeCount <= 0)
+            {
+                continue;
+            }
+
+            Thing thingToConsume;
+            if (consumeCount >= sourceThing.stackCount)
+            {
+                thingToConsume = sourceThing;
+            }
+            else
+            {
+                thingToConsume = sourceThing.SplitOff(consumeCount);
+            }
+
+            surgeryBill.recipe.Worker.ConsumeIngredient(thingToConsume, surgeryBill.recipe, ParentMap);
         }
     }
 
@@ -185,7 +295,6 @@ internal class CompAutoDoc : ThingComp
         position.x += array[2];
         position.z += array[3];
         materialSearch = CellRect.CenteredOn(position, array[0], array[1]);
-        materialSearch.DebugDraw();
     }
 
     private List<Thing> checkMat()
@@ -212,10 +321,16 @@ internal class CompAutoDoc : ThingComp
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("AuDo_CurrentBill".Translate(surgeryBill.Label));
         stringBuilder.AppendLine(timer > 0f ? "AuDo_TimeLeft".Translate((int)timer / 10) : "AuDo_Done".Translate());
-        stringBuilder.Append("AuDo_Requires".Translate());
-        foreach (var ingredient in surgeryBill.recipe.ingredients)
+
+        var ingredientsText = surgeryBill.recipe.ingredients.Select(ingredient => ingredient.ToString()).ToCommaList();
+        var requiresLabel = "AuDo_Requires".Translate().ToString().TrimEnd();
+        if (!ingredientsText.NullOrEmpty())
         {
-            stringBuilder.Append(ingredient);
+            stringBuilder.Append(requiresLabel).Append(' ').Append(ingredientsText);
+        }
+        else
+        {
+            stringBuilder.Append(requiresLabel);
         }
 
         return stringBuilder.ToString();

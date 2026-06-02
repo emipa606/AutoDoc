@@ -3,7 +3,7 @@
   <ResearchProjectDef>
     <defName>AutoDoc</defName>
     <label>Auto Doc</label>
-    <description>The Automatic Doctor, gone are the days of Bionc arms installed in the neck.</description>
+    <description>The Automatic Doctor, gone are the days of Bionic arms installed in the neck.</description>
     <baseCost>3000</baseCost>
     <techLevel>Spacer</techLevel>
     <requiredResearchBuilding>HiTechResearchBench</requiredResearchBuilding>
@@ -15,7 +15,7 @@
       <li>HospitalBed</li>
       <li>VitalsMonitor</li>
     </prerequisites>
-    <researchViewX>15.00</researchViewX>
-    <researchViewY>1.50</researchViewY>
+    <researchViewX>14.00</researchViewX>
+    <researchViewY>1.80</researchViewY>
   </ResearchProjectDef>
 </Defs>

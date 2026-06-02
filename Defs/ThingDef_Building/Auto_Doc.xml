@@ -40,7 +40,7 @@
         <basePowerConsumption>400</basePowerConsumption>
       </li>
       <li Class="CompProperties_Flickable" />
-      <li Class="Autodoc.CompPropertiesAutoDocBuilding">
+      <li Class="AutoDoc.CompPropertiesAutoDocBuilding">
         <compClass>AutoDoc.CompAutoDoc</compClass>
       </li>
     </comps>

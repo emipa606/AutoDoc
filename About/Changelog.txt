@@ -1,5 +1,8 @@
 # Changelog for AutoDoc
 
+1.6.2 - Fixed cryptosleep sickness, research placement, bodypart duplication, xenogerms/hemogen extraction, ingredient range.
+
+
 1.6.1 - Fixed xenogerm implantation
 
 

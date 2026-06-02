@@ -14,6 +14,7 @@ The Auto Doc mod allows players to queue surgery for a pawn, which can be comple
 - **Open Access:** The Auto Doc can be accessed without the need for another pawn to open it.
 - **Save-Support:** Progress inside the Auto Doc is now saved, ensuring continuity across game sessions.
 - **Deferred Surgery Start:** Ingredients and surgeries are executed at the end of the countdown, not at the beginning.
+- **Visible Material Range Overlay:** Selecting the Auto Doc now displays the nearby item search area used for surgery ingredients.
 
 ## Coding Patterns and Conventions
 

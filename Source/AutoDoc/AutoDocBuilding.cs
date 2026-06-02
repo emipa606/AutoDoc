@@ -77,6 +77,12 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
         yield return exitAutoDoc();
     }
 
+    public override void DrawExtraSelectionOverlays()
+    {
+        base.DrawExtraSelectionOverlays();
+        GenDraw.DrawFieldEdges(getMaterialSearchRect().Cells.ToList());
+    }
+
     private Gizmo exitAutoDoc()
     {
         var commandAction = new Command_Action
@@ -106,7 +112,28 @@ internal class AutoDocBuilding : Building_CryptosleepCasket
 
     public override void EjectContents()
     {
-        base.EjectContents();
+        innerContainer.TryDropAll(InteractionCell, Map, ThingPlaceMode.Near);
+        contentsKnown = true;
         autoDoc.Reset();
+    }
+
+    private CellRect getMaterialSearchRect()
+    {
+        var position = Position;
+        var dimensions = deterDimensions();
+        position.x += dimensions[2];
+        position.z += dimensions[3];
+        return CellRect.CenteredOn(position, dimensions[0], dimensions[1]);
+    }
+
+    private int[] deterDimensions()
+    {
+        return Rotation.ToString() switch
+        {
+            "0" => [3, 4, 0, 1],
+            "1" => [4, 3, 1, 0],
+            "2" => [3, 4, 0, 0],
+            _ => [4, 3, 0, 0]
+        };
     }
 }
